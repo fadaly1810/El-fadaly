@@ -304,7 +304,7 @@ class Info extends StatelessWidget {
       throw "لا يمكن فتح تطبيق الاتصال!";
     }
   }
-
+//15154
   void _sendEmail(String email) async {
     final Uri emailUri = Uri.parse("mailto:$email");
     if (await canLaunchUrl(emailUri)) {
