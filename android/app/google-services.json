@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "1054778208258",
+    "project_id": "fadaly-1023f",
+    "storage_bucket": "fadaly-1023f.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1054778208258:android:d6be42ef073f2d848bb71b",
+        "android_client_info": {
+          "package_name": "com.example.el_fadaly_gallery"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyD-TVO5HfFcag4vnuSR6IT8SsaOjL09nGE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1054778208258:android:2ece1e39fef334488bb71b",
+        "android_client_info": {
+          "package_name": "com.example.fadaly"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyD-TVO5HfFcag4vnuSR6IT8SsaOjL09nGE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
