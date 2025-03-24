@@ -7,15 +7,18 @@ environment:
   sdk: ^3.7.0
 
 dependencies:
+  cached_network_image: ^3.4.1
   cloud_firestore: ^5.6.5
   firebase_core: null
   flutter:
     sdk: flutter
   font_awesome_flutter: ^10.8.0
+  google_fonts: ^6.2.1
+  photo_view: ^0.15.0
   url_launcher: ^6.3.1
 
 dev_dependencies:
-  flutter_launcher_icons: ^0.13.1
+  flutter_launcher_icons: ^0.14.3
   flutter_lints: ^5.0.0
   flutter_test:
     sdk: flutter
@@ -29,3 +32,6 @@ flutter_icons:
   android: true
   ios: true
   image_path: "assets/logo.jpg"
+  web:
+    generate: true
+    image_path: "assets/logo.jpg"
