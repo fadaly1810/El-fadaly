@@ -1,7 +1,10 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:el_fadaly_gallery/full_screen_image_page.dart';
+import 'package:el_fadaly_gallery/share_gallery_page.dart';
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
+
+import 'full_screen_image_page.dart';
 
 class LocationsGalleryPage extends StatelessWidget {
   const LocationsGalleryPage({super.key});
@@ -9,136 +12,414 @@ class LocationsGalleryPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
-      appBar: AppBar(
-        backgroundColor: Colors.green[700],
-                iconTheme: IconThemeData(color: Colors.white),
+      backgroundColor: const Color(0xffF6F8F6),
 
+      // ==========================================================
+      // APP BAR
+      // ==========================================================
+
+      appBar: AppBar(
+        backgroundColor: const Color(0xff168044),
+        foregroundColor: Colors.white,
         centerTitle: true,
+
         title: Text(
-          "معرض الصور حسب المواقع",
-          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+          'المشروعات والمواقع',
+          style: GoogleFonts.cairo(
+            fontWeight: FontWeight.bold,
+          ),
         ),
       ),
-      body: Stack(
-        children: [
-         
-          Positioned.fill(
-            child: Opacity(
-              opacity: 0.1, 
-              child: Image.asset(
-                "assets/logo.jpg",
-                fit: BoxFit.cover,
-                alignment: Alignment.center,
+
+      // ==========================================================
+      // FIRESTORE
+      // ==========================================================
+
+      body: StreamBuilder<QuerySnapshot>(
+        stream: FirebaseFirestore.instance
+            .collection('locations_gallery')
+            .snapshots(),
+
+        builder: (context, snapshot) {
+          // ------------------------------------------------------
+          // LOADING
+          // ------------------------------------------------------
+
+          if (snapshot.connectionState ==
+              ConnectionState.waiting) {
+            return const Center(
+              child: CircularProgressIndicator(
+                color: Color(0xff168044),
               ),
-            ),
-          ),
+            );
+          }
 
-          
-          StreamBuilder<QuerySnapshot>(
-            stream:
-                FirebaseFirestore.instance
-                    .collection('locations_gallery')
-                    .snapshots(),
-            builder: (context, snapshot) {
-              if (snapshot.connectionState == ConnectionState.waiting) {
-                return Center(
-                  child: CircularProgressIndicator(color: Colors.green),
-                );
-              }
-              if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-                return Center(child: Text("لا توجد بيانات"));
-              }
+          // ------------------------------------------------------
+          // ERROR
+          // ------------------------------------------------------
 
-              var locations = snapshot.data!.docs;
+          if (snapshot.hasError) {
+            return Center(
+              child: Text(
+                'حدث خطأ أثناء تحميل البيانات',
+                style: GoogleFonts.cairo(
+                  color: Colors.red,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            );
+          }
 
-              return ListView.builder(
-                itemCount: locations.length,
-                padding: EdgeInsets.all(10),
-                itemBuilder: (context, index) {
-                  var location = locations[index];
-                  String locationName = location['name'];
-                  List<dynamic> images = location['images'];
+          // ------------------------------------------------------
+          // EMPTY
+          // ------------------------------------------------------
 
-                  return Card(
-                    color:
-                        Colors.green[50], 
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(10),
+          if (!snapshot.hasData ||
+              snapshot.data!.docs.isEmpty) {
+            return Center(
+              child: Text(
+                'لا توجد مواقع',
+                style: GoogleFonts.cairo(),
+              ),
+            );
+          }
+
+          final locations = snapshot.data!.docs;
+
+          // ======================================================
+          // PROJECTS LIST
+          // ======================================================
+
+          return ListView.builder(
+            padding: const EdgeInsets.all(15),
+            itemCount: locations.length,
+
+            itemBuilder: (context, index) {
+              // --------------------------------------------------
+              // DATA
+              // --------------------------------------------------
+
+              final data =
+                  locations[index].data()
+                      as Map<String, dynamic>;
+
+              final String name =
+                  data['name']?.toString() ??
+                      'بدون اسم';
+
+              final List<dynamic> images =
+                  data['images'] is List
+                      ? List<dynamic>.from(
+                          data['images'],
+                        )
+                      : [];
+
+              // ==================================================
+              // PROJECT CARD
+              // ==================================================
+
+              return Container(
+                margin:
+                    const EdgeInsets.only(bottom: 18),
+
+                decoration: BoxDecoration(
+                  color: Colors.white,
+
+                  borderRadius:
+                      BorderRadius.circular(20),
+
+                  boxShadow: [
+                    BoxShadow(
+                      color:
+                          Colors.black.withOpacity(.07),
+                      blurRadius: 14,
+                      offset: const Offset(0, 5),
                     ),
-                    margin: EdgeInsets.symmetric(vertical: 10),
-                    elevation: 4,
-                    child: Padding(
-                      padding: EdgeInsets.all(10),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
+                  ],
+                ),
+
+                child: Column(
+                  children: [
+                    // ==================================================
+                    // PROJECT HEADER
+                    // ==================================================
+
+                    Padding(
+                      padding:
+                          const EdgeInsets.all(15),
+
+                      child: Row(
                         children: [
-                          Center(
-                            child: Text(
-                              locationName,
-                              style: TextStyle(
-                                fontSize: 20,
-                                fontWeight: FontWeight.bold,
-                              ),
+                          // ------------------------------------------
+                          // LOCATION ICON
+                          // ------------------------------------------
+
+                          Container(
+                            width: 48,
+                            height: 48,
+
+                            decoration:
+                                BoxDecoration(
+                              color: const Color(
+                                0xff146C94,
+                              ).withOpacity(.10),
+
+                              shape:
+                                  BoxShape.circle,
+                            ),
+
+                            child: const Icon(
+                              Icons.location_on,
+                              color:
+                                  Color(0xff146C94),
                             ),
                           ),
-                          SizedBox(height: 10),
-                          SizedBox(
-                            height: 120,
-                            child: ListView.builder(
-                              scrollDirection: Axis.horizontal,
-                              itemCount: images.length,
-                              itemBuilder: (context, imgIndex) {
-                                return Padding(
-                                  padding: EdgeInsets.only(right: 10),
-                                  child: GestureDetector(
-                                    onTap: () {
-                                      Navigator.push(
-                                        context,
-                                        MaterialPageRoute(
-                                          builder:
-                                              (context) => FullScreenImagePage(
-                                                name: locationName,
-                                                images: images,
-                                                initialIndex: imgIndex,
-                                              ),
-                                        ),
-                                      );
-                                    },
-                                    child: ClipRRect(
-                                      borderRadius: BorderRadius.circular(10),
-                                      child: CachedNetworkImage(
-                                        imageUrl: images[imgIndex],
-                                        width: 120,
-                                        height: 120,
-                                        fit: BoxFit.cover,
-                                        placeholder:
-                                            (context, url) => Center(
-                                              child: CircularProgressIndicator(
-                                                color: Colors.green,
-                                              ),
-                                            ),
-                                        errorWidget:
-                                            (context, url, error) => Icon(
-                                              Icons.error,
-                                              color: Colors.red,
-                                            ),
-                                      ),
-                                    ),
+
+                          const SizedBox(width: 12),
+
+                          // ------------------------------------------
+                          // PROJECT NAME
+                          // ------------------------------------------
+
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment:
+                                  CrossAxisAlignment
+                                      .start,
+
+                              children: [
+                                Text(
+                                  name,
+
+                                  maxLines: 2,
+
+                                  overflow:
+                                      TextOverflow
+                                          .ellipsis,
+
+                                  style:
+                                      GoogleFonts
+                                          .cairo(
+                                    fontSize: 18,
+                                    fontWeight:
+                                        FontWeight
+                                            .bold,
                                   ),
-                                );
-                              },
+                                ),
+
+                                const SizedBox(
+                                  height: 2,
+                                ),
+
+                                Text(
+                                  '${images.length} صورة',
+
+                                  style:
+                                      GoogleFonts
+                                          .cairo(
+                                    fontSize: 11,
+                                    color:
+                                        Colors.grey,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+
+                          // ------------------------------------------
+                          // SHARE PROJECT
+                          // ------------------------------------------
+
+                          Container(
+                            decoration:
+                                BoxDecoration(
+                              color: const Color(
+                                0xff168044,
+                              ).withOpacity(.10),
+
+                              shape:
+                                  BoxShape.circle,
+                            ),
+
+                            child: IconButton(
+                              tooltip:
+                                  'مشاركة المشروع',
+
+                              onPressed:
+                                  images.isEmpty
+                                      ? null
+                                      : () {
+                                          Navigator
+                                              .push(
+                                            context,
+                                            MaterialPageRoute(
+                                              builder:
+                                                  (_) =>
+                                                      ShareGalleryPage(
+                                                name:
+                                                    name,
+                                                images:
+                                                    images,
+                                              ),
+                                            ),
+                                          );
+                                        },
+
+                              icon: const Icon(
+                                Icons
+                                    .share_outlined,
+
+                                color:
+                                    Color(
+                                  0xff168044,
+                                ),
+                              ),
                             ),
                           ),
                         ],
                       ),
                     ),
-                  );
-                },
+
+                    // ==================================================
+                    // IMAGES
+                    // ==================================================
+
+                    if (images.isNotEmpty)
+                      GridView.builder(
+                        shrinkWrap: true,
+
+                        physics:
+                            const NeverScrollableScrollPhysics(),
+
+                        padding:
+                            const EdgeInsets.fromLTRB(
+                          15,
+                          0,
+                          15,
+                          15,
+                        ),
+
+                        gridDelegate:
+                            const SliverGridDelegateWithFixedCrossAxisCount(
+                          crossAxisCount: 3,
+                          crossAxisSpacing: 8,
+                          mainAxisSpacing: 8,
+                        ),
+
+                        itemCount:
+                            images.length,
+
+                        itemBuilder:
+                            (context, imgIndex) {
+                          return GestureDetector(
+                            onTap: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (_) =>
+                                      FullScreenImagePage(
+                                    name: name,
+                                    images: images,
+                                    initialIndex:
+                                        imgIndex,
+                                  ),
+                                ),
+                              );
+                            },
+
+                            child: ClipRRect(
+                              borderRadius:
+                                  BorderRadius
+                                      .circular(12),
+
+                              child:
+                                  CachedNetworkImage(
+                                imageUrl:
+                                    images[imgIndex]
+                                        .toString(),
+
+                                fit: BoxFit.cover,
+
+                                placeholder:
+                                    (
+                                  context,
+                                  url,
+                                ) =>
+                                        const Center(
+                                  child:
+                                      CircularProgressIndicator(
+                                    strokeWidth: 2,
+                                    color:
+                                        Color(
+                                      0xff168044,
+                                    ),
+                                  ),
+                                ),
+
+                                errorWidget:
+                                    (
+                                  context,
+                                  url,
+                                  error,
+                                ) =>
+                                        const Center(
+                                  child: Icon(
+                                    Icons
+                                        .broken_image,
+                                    color:
+                                        Colors.red,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          );
+                        },
+                      ),
+
+                    // ==================================================
+                    // NO IMAGES
+                    // ==================================================
+
+                    if (images.isEmpty)
+                      Padding(
+                        padding:
+                            const EdgeInsets.all(
+                          20,
+                        ),
+
+                        child: Column(
+                          children: [
+                            Icon(
+                              Icons
+                                  .image_not_supported_outlined,
+                              size: 40,
+                              color:
+                                  Colors.grey.shade400,
+                            ),
+
+                            const SizedBox(
+                              height: 8,
+                            ),
+
+                            Text(
+                              'لا توجد صور لهذا المشروع',
+
+                              style:
+                                  GoogleFonts.cairo(
+                                color:
+                                    Colors.grey,
+                                fontSize: 13,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                  ],
+                ),
               );
             },
-          ),
-        ],
+          );
+        },
       ),
     );
   }
